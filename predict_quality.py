@@ -32,21 +32,21 @@ def preproccess(red, white):
     #       concatenating to avoid duplicating index
     wines = red.append(white, ignore_index=True)
 
-    # specify the data
-    X = wines.iloc[:,0:11]
-
     # specify the target labels and flatten the array
-    y = np.ravel(wines.type)
+    y = wines.quality
+    # specify the data
+    X = wines.drop('quality', axis=1) 
+
 
     return X, y
 
-def build_model(X_train, y_train):
+def build_model():
 
     # now build the model
     model = Sequential()
-    model.add(Dense(12, activation='relu',input_shape=(11,)))
+    model.add(Dense(64, activation='relu',input_dim=12))
     model.add(Dense(8, activation='relu'))
-    model.add(Dense(1,activation='sigmoid'))
+    model.add(Dense(1))
 
     # print the model in human readable diagram
     plot_model(model, to_file='model.png')
@@ -56,9 +56,7 @@ def build_model(X_train, y_train):
 def train_model(model, X_train, y_train):
 
     # now we compile and fit
-    model.compile(loss='binary_crossentropy',
-                  optimizer='adam',
-                  metrics=['accuracy'])
+    model.compile(optimizer='rmsprop', loss='mse', metrics=['mae'])
 
     model.fit(X_train, y_train,epochs=20, batch_size=1, verbose=1)
 
@@ -70,16 +68,16 @@ def train_model(model, X_train, y_train):
 def predict(model, X_test, y_test):
 
     # get the prediction for the test data
-    y_pred = model.predict_classes(X_test)
+    y_pred = model.predict(X_test)
     # evaluate the scores 
     score = model.evaluate(X_test, y_test,verbose=1)
     print(score)
 
     # Metrics
-    print(confusion_matrix(y_test, y_pred))
-    print(precision_score(y_test, y_pred))
-    print(recall_score(y_test, y_pred))
-    print(f1_score(y_test,y_pred))
+#    print(confusion_matrix(y_test, y_pred))
+#    print(precision_score(y_test, y_pred))
+#    print(recall_score(y_test, y_pred))
+#    print(f1_score(y_test,y_pred))
 
 def run():
 
@@ -96,17 +94,17 @@ def run():
     scaler = StandardScaler().fit(X_train)
 
     # Scale the train set
-    X_train = scaler.transform(X_train)
+    X_train = StandardScaler().fit_transform(X_train)
+
     # Scale the test set
-    X_test = scaler.transform(X_test)
+    X_test = StandardScaler().fit_transform(X_test)
 
     # now build and train the network
-    model = build_model(X_train,y_train)
+    model = build_model()
     trained_model = train_model(model, X_train,y_train)
   
     # now test the model
     predict(trained_model, X_test, y_test)
-
 
 if __name__ == '__main__':
     run()

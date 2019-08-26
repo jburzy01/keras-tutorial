@@ -40,7 +40,7 @@ def preproccess(red, white):
 
     return X, y
 
-def build_model(X_train, y_train):
+def build_model():
 
     # now build the model
     model = Sequential()
@@ -101,7 +101,7 @@ def run():
     X_test = scaler.transform(X_test)
 
     # now build and train the network
-    model = build_model(X_train,y_train)
+    model = build_model()
     trained_model = train_model(model, X_train,y_train)
   
     # now test the model
